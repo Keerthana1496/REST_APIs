@@ -20,18 +20,22 @@ public class TransactionGetController {
 	static float sum=0;
 	static float min=9999,max=0;
 	
-	@RequestMapping(value="/statistics",consumes= MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE, method =RequestMethod.POST )
-	public ResponseEntity<List<AmountTransaction>> TransactionMethod(@RequestBody List<AmountTransaction> transact) throws ParseException
+	@RequestMapping(value="/transactions",consumes= MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE, method =RequestMethod.POST )
+	public ResponseEntity<AmountTransaction> TransactionMethod(@RequestBody AmountTransaction transact) throws ParseException
+	{
+		long currenttime=System.currentTimeMillis();
+		long usertime=transact.getTimestamp();
+		if((currenttime-usertime)<60000)
+			return new ResponseEntity<AmountTransaction>(transact, HttpStatus.CREATED);
+		else
+			return new ResponseEntity<AmountTransaction>(transact, HttpStatus.NO_CONTENT) ;
+	}
+	
+	@RequestMapping(value="/postTransactions",consumes= MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE, method =RequestMethod.POST )
+	public ResponseEntity<List<AmountTransaction>> TransactionpostMethod(@RequestBody List<AmountTransaction> transact) throws ParseException
 	{
 		
 		long currenttime=System.currentTimeMillis();
-		
-		/*long usertime=0;
-		if((currenttime-usertime)<60000)
-			return new ResponseEntity<List<AmountTransaction>>(transact, HttpStatus.CREATED);
-		else
-			return new ResponseEntity<List<AmountTransaction>>(transact, HttpStatus.NO_CONTENT) ;*/
-		
 		transact.stream().forEach(c -> 
 			{
 				long usertime=c.getTimestamp();
@@ -53,12 +57,11 @@ public class TransactionGetController {
 		{
 			avg=(int)sum/count;
 		}
-		System.out.println(ct.getCount());
 		return new ResponseEntity<List<AmountTransaction>>( HttpStatus.CREATED);
 	}
 
 	@ResponseBody
-	@RequestMapping(value="/statistics1", method =RequestMethod.GET )
+	@RequestMapping(value="/statistics", method =RequestMethod.GET )
 	public ResponseEntity<CalculationTransaction> TransactiongetMethod(CalculationTransaction transact)
 	{
 		transact.setCount(count);
